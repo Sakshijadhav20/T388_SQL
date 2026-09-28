@@ -253,7 +253,7 @@ select * from trimmer;
 select ename, length(ename), ltrim(ename) as lefttrim, length(ltrim(ename)) as lefttrimlen, rtrim(ename) as righttrim, length(rtrim(ename)) as righttrimlen from trimmer;
 select ename,length(ename), trim(ename) as bothsidetrim, length(trim(ename)) as bothsidetrimlen from trimmer;
 
--- subqueries **do not use order by in inner query --
+-- single row subqueries **do not use order by in inner query** ** inner query when executed gives only one value**  --
 select age from employee where employeeid=1002;
 select age from employee where fullname='Mary Smith';
 select * from employee where age= (select age from employee where fullname='Mary Smith'); -- query to find the age or info of other employee have age same as mary smith --
@@ -264,3 +264,70 @@ select salary from employee order by salary desc;
 select max(salary) from employee;
 select max(salary) from employee where salary < (select max(salary) from employee); -- second highest salary --
 select max(salary) from employee where salary < (select max(salary) from employee where salary < (select max(salary) from employee)); -- third highest salary--
+
+-- Multiple row subquery ** inner query when executed gives two or more value**  --
+-- multi row sub query (inner querry when executed gives more than two values) 
+select age from employee where employeeId in (1002,1003); 
+select * from employee where age in(select age from employee where employeeid in (1002,1003)); -- use to get info of all employee whoes employeeid is 1002,1003
+-- Any subquerry >any= more than minimum/  <any= less athan maximum ** any uses 'or' logic**
+select * from employee where salary>any(select Salary from employee where EmployeeId in ("1001","1002","1003")); -- any uses greater than minimum and less then maximum also it uses "or" logic
+select * from employee where salary<any(select Salary from employee where EmployeeId in ("1001","1002","1003"));
+select * from employee where salary>=any(select Salary from employee where EmployeeId in ("1001","1002","1003"));
+-- all subquerry >all= more than maximum/ <all= less than minimum ** all uses 'and' logic**
+select * from employee where salary>All(select Salary from employee where EmployeeId between 1001 and 1003); -- All uses greater than maximum and less than minimum also it usses "and" logic 
+select * from employee where salary<All(select Salary from employee where EmployeeId between 1001 and 1003);
+
+-- joins subquerry 
+-- inner join  **only shows similar and intersecting records**
+select name_t388.id, name_,salary from name_t388 join salary_t388 on name_t388.id=salary_t388.id;
+select a.id, name_,salary from name_t388 as a join salary_t388 as b on a.id=b.id; -- alias on table name
+-- left join ** all records from left table and intersecting/ similar records with right table** **always take common column from the table used in left/ right  join
+select name_t388.id, name_,salary from name_t388 left join salary_t388 on name_t388.id=salary_t388.id;
+select a.id, name_,salary from name_t388 as a left join salary_t388 as b on a.id = b.id; -- alias on table name
+-- right join **always take common column from the table used in left/ right  join
+select name_t388.id, name_,salary from salary_t388 right join name_t388 on name_t388.id=salary_t388.id;
+select salary_t388.id,name_,salary from salary_t388 right join name_t388 on salary_t388.id=name_t388.id;
+
+
+CREATE TABLE Handsets (
+    SetCode VARCHAR(10) PRIMARY KEY,
+    SetName VARCHAR(50),
+    TouchScreen CHAR(1),
+    PhoneCost INT
+);
+INSERT INTO Handsets (SetCode, SetName, TouchScreen, PhoneCost)
+VALUES
+('N1', 'Nokia 2G', 'N', 5000),
+('N2', 'Nokia 3G', 'Y', 8000),
+('B1', 'BlackBerry', 'N', 14000);
+CREATE TABLE Customer (
+    CustNo INT PRIMARY KEY,
+    SetNo VARCHAR(10),
+    CustAddress VARCHAR(50)
+);
+INSERT INTO Customer (CustNo, SetNo, CustAddress)
+VALUES
+(1, 'N2', 'Delhi'),
+(2, 'B1', 'Mumbai'),
+(3, 'N2', 'Mumbai'),
+(4, 'N1', 'Kolkata'),
+(5, 'B1', 'Delhi');
+select * from handsets;
+select * from customer;
+
+select custno,setno,custaddress from customer inner join handsets on setno=setcode where setname like 'Nokia%' ;
+select custno,setno,custaddress from customer left join handsets on setno=setcode where setname like 'Nokia%' ;
+
+
+-- OUTER JOIN (outer join/full outer join no keywords in mysql but can use in other dbms like oracle, microsoft servers
+select * from name_t388;
+select * from salary_t388;
+
+select name_t388.ID , name_, salary from name_t388 left join salary_t388 on name_t388.id=salary_t388.id;
+
+select name_t388.ID ,salary_t388.id, name_, salary from name_t388 left join salary_t388 on name_t388.id=salary_t388.id union all 
+select name_t388.ID ,salary_t388.id, name_, salary from name_t388 right join salary_t388 on name_t388.id=salary_t388.id; -- outer=union(unique value) do not gives duplicate and full outer=union all(do not give unique values) gives duplicate
+
+
+
+ 
