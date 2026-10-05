@@ -324,10 +324,101 @@ select * from name_t388;
 select * from salary_t388;
 
 select name_t388.ID , name_, salary from name_t388 left join salary_t388 on name_t388.id=salary_t388.id;
-
 select name_t388.ID ,salary_t388.id, name_, salary from name_t388 left join salary_t388 on name_t388.id=salary_t388.id union all 
 select name_t388.ID ,salary_t388.id, name_, salary from name_t388 right join salary_t388 on name_t388.id=salary_t388.id; -- outer=union(unique value) do not gives duplicate and full outer=union all(do not give unique values) gives duplicate
 
 
+ -- WINDOW FUNCTION 
+ -- row_number()= gives row rank
+ -- rank() = gives rank like if 2 record shares same rank like 1 1 then the next record will get rank as 3, 2 is skipped
+ -- dense_rank()= does not skip goes in sequence if 2 record
+ -- partition works like group by but gives result in single row wise
+select * from employee;
+select  *, row_number() over ( partition by department) as rankindepartment from employee;
+select  *, row_number() over ( partition by salary) as rankinsalary from employee order by salary desc;
 
- 
+select fullname, salary, rank() over (order by salary desc) as rankindept from employee order by department ;
+select *, avg(salary) over (partition by department) as departmentavgsalary,
+sum(salary) over (partition by department) as departmentsumsalary  from employee order by department, salary desc ;
+
+select employeeid,fullname,department, salary, 
+avg(salary) over (partition by department) as departmentavgsalary,
+sum(salary) over (partition by department) as departmentsumsalary  from employee where gender= "female" order by department, salary desc ;
+
+select 
+employeeid, 
+fullname, 
+department, 
+age, 
+salary, 
+lag(salary,1,0) over(partition by department order by age asc) as previousemployeesalarybyage
+from employee 
+order by department, age;
+
+select 
+employeeid, 
+fullname, 
+department, 
+age, 
+salary, 
+lag(salary,2,0) over(order by salary) as previousemployeesalarybyage
+from employee 
+order by salary;
+
+select 
+employeeid, 
+fullname, 
+department, 
+age, 
+salary, 
+lag(salary,1,"-") over(order by salary) as previousemployeesalarybyage,
+(Salary - "previousemployeesalarybyage") as diff
+from employee 
+order by salary;
+
+select 
+employeeid, 
+fullname, 
+department, 
+age, 
+salary, 
+lead(salary,1,"-") over(order by salary) as nextemployeesalarybyage
+from employee 
+order by salary;
+
+-- SELF JOIN
+Create table empmgr(Emp_ID int, Emp_name varchar(20), Manager_ID int);
+insert into empmgr values(1,"Amar",4),(5,"Akbar",4),(7,"Anthony", Null),(4,"Tom",7);
+select * from empmgr;
+
+select 
+e.emp_id,
+e.emp_name as Employee_Name,
+m.emp_name as Manager_Name
+from empmgr as e
+left join 
+empmgr as m
+on 
+m.emp_id=e.Manager_id;
+
+-- CROSS JOIN/ cardinal join  == no "on" is required because each record is comapred with every other record 
+create table chessteamA(Team_A_ID int, Player_Name varchar (20));
+insert into chessteamA values (101,"kunal"),(102,"kiran"),(103,"suman"),(104,"shekhar");
+create table chessteamB(Team_B_ID int, Player_Name varchar(20));
+insert into chessteamB values (1,"amir"),(2,"Salman"),(3,"aditya");
+
+select * from chessteamA;
+select * from chessteamB;
+
+select team_A_id, team_B_ID, A.player_name,B.Player_name
+from chessteamA as A
+cross join chessteamB as B;
+
+-- VIEW & CTE -- view temporary data stored in sql database
+create view t388_view1 as 
+select team_A_id, team_B_ID, A.player_name as Name_A, B.Player_name as Name_B
+from chessteamA as A
+cross join chessteamB as B;
+
+select * from T388_view1;
+

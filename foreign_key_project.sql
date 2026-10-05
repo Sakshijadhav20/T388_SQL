@@ -63,5 +63,9 @@ delete from employee where id=666;
 
 -- NORMALIZATION = systematic decomposing of data to reduce redundancy
 -- purpose of normalization = eliminate repeated data, ensure data dependecies make logical sense
--- 1NF= tackles problem of atomicity(values in table should not be further divided/ a single cell cannot hold multiple values )
--- 2NF= no partial dependecy
+-- 1NF= tackles problem of atomicity(values in table should not be further divided/ a single cell cannot hold multiple values ), eliminates repeating data, ensures atomicity
+-- 2NF= must be in 1NF +  no partial dependecy
+-- 3NF = must be in 2NF + no transitive dependencies
+
+-- WINDOW FUNCTION
+select  *, row_number() over ( partition by department)from employee;
